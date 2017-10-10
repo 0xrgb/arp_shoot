@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdint>
 #include <cstring>
+#include <arpa/inet.h>
 #include <netinet/in.h>
 #include <netinet/ether.h>
 
