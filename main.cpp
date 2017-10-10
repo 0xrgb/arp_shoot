@@ -58,12 +58,16 @@ int main(int argc, char *argv[]) {
 		ret = getMyIPAddress(network, my_buf, MY_BUF_LEN);
 		if (ret != 0) RAGE_QUIT("Cannot get ip address\n");
 
+		printf("My IP: %s\n", my_buf);
+
 		ret = inet_pton(AF_INET, my_buf, &my_ip_addr);
 		if (ret != 1) RAGE_QUIT("Cannot convert ip address: %s\n", my_buf);
 
 		// 내 MAC address를 찾는다
 		ret = getMyMACAddress(network, my_buf, MY_BUF_LEN);
 		if (ret != 0) RAGE_QUIT("Cannot get MAC Address\n");
+
+		printf("My MAC: %s\n", my_buf);
 
 		ether_aton_r(my_buf, &my_mac_addr);
 
@@ -82,6 +86,8 @@ int main(int argc, char *argv[]) {
 		// shoot!
 		ret = pcap_inject(handle, arp_packet_buf, ARP_PACKET_LEN);
 		if (ret == -1) RAGE_QUIT("Cannot send ARP request: %s\n", ebuf);
+
+		printf("Shoot ARP request\n");
 	}
 
 	// 아까 보낸 패킷의 arp reply를 찾아보자
@@ -96,6 +102,9 @@ int main(int argc, char *argv[]) {
 		if (is_arp_reply(header->caplen, packet, target_ip_addr, &target_mac_addr)) break;
 	}
 
+	ether_ntoa_r(&target_mac_addr, my_buf);
+	printf("Found ARP reply. Target MAC: %s\n", my_buf);
+
 	// Shooting star
 	for(;;) {
 		create_eth_arp(arp_packet_buf,
@@ -107,6 +116,8 @@ int main(int argc, char *argv[]) {
 
 		int ret = pcap_inject(handle, arp_packet_buf, ARP_PACKET_LEN);
 		if (ret == -1) RAGE_QUIT("Failed to send ARP reply\n");
+
+		printf("Send ARP reply...\n");
 
 		// 잠시 쉰다
 		sleep(1);
